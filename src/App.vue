@@ -1,27 +1,66 @@
 <template>
   <div id="app">
     <router-view/>
-    <p>{{currentWeather__today}}</p>
+    <label>
+      <input type="text" v-model="city" />
+      <button @click="getCityCoords()">Get Weather</button>
+    </label>
+    <p>{{currentWeather.data.currently.temperature || 'Loading'}}</p>
   </div>
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from "vuex";
+import Axios from 'axios';
+import Geocoder from 'geocoder';
+import Promise from 'bluebird';
+
+const DARK_SKY_API_KEY = 'acac1384f16e2dccd6b5813d915b0ae8';
+
 export default {
   name: "App",
+  data () {
+    return {
+      location: {},
+      city: '',
+      currentWeather: {
+        data: {
+          currently: 0
+        }
+      }
+    }
+  },
   computed: {
-    ...mapState(['currentLocation', 'currentWeather__today'])
+    
   },
   methods: {
-    ...mapActions(['setCurrentWeather__today']),
-    ...mapMutations(['setCurrentLocation'])
+    getCityCoords() {
+      Geocoder.geocode(this.city, (err, data) => {
+          this.city = data.results[0].formatted_address;
+          this.lat = data.results[0].geometry.location.lat;
+          this.lon = data.results[0].geometry.location.lon;
+          this.getWeather()
+      });
+    },
+    getWeather(location) {
+      console.log(location);
+      
+    }
   },
   beforeMount() {
-    this.setCurrentLocation();
-  },
-  mounted() {
-    this.setCurrentWeather__today();
-    // console.log('get location here')
+    return new Promise( (resolve, reject) => {
+      navigator.geolocation.getCurrentPosition( data => {
+        let location = {
+          lat: data.coords.latitude,
+          lon: data.coords.longitude
+        }
+        Axios.get(`https://api.darksky.net/forecast/acac1384f16e2dccd6b5813d915b0ae8/${location.lat},${location.lon}`).then( (weather) => {
+          this.currentWeather = weather;
+        });
+      });
+      
+      resolve();
+    });
+    
   }
   
 };
