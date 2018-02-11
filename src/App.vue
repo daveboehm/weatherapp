@@ -3,7 +3,7 @@
     <router-view/>
     <label>
       <input type="text" v-model="searchLocation.city" />
-      <button @click="onCitySearch()">City Search</button>
+      <button @click="onCitySearch">City Search</button>
     </label>
     <p>Current Temperate at this computer's location: {{currentWeather.data.currently.temperature || 'Loading'}}</p>
     <ul class="searchedCity">
@@ -45,22 +45,22 @@ export default {
 
       // The tracked cities per user's local Storage
       trackedWeather: [
-        {
-          city: 'Austin, TX',
-          temperature: '54 F',
-          chanceOfRain: '27%'
-        }, {
-          city: 'Madison, WI',
-          temperature: '11 F',
-          chanceOfRain: '0.5%'
-        }
+        // {
+        //   city: 'Austin, TX',
+        //   temperature: '54 F',
+        //   chanceOfRain: '27%'
+        // }, {
+        //   city: 'Madison, WI',
+        //   temperature: '11 F',
+        //   chanceOfRain: '0.5%'
+        // }
       ],
       
       // Placeholder for current location and local weather stats
       userLocation: {
         city: '',
         lat: '',
-        lon: '',
+        lng: '',
         temperature: '',
         chanceOfRain: ''
       },
@@ -76,58 +76,53 @@ export default {
   },
   methods: {
     getWeather(coords) {
-      console.log(coords)
-      Axios.get(`https://api.darksky.net/forecast/${DARK_SKY_API_KEY}/${coords.lat},${coords.lon}`).then(weather => {
-        this.searchLocation.temperature = weather.currently.temperature;
+      Axios.get(`https://api.darksky.net/forecast/${DARK_SKY_API_KEY}/${coords.lat},${coords.lng}`).then(weather => {
+        console.log(weather);
+        this.searchLocation.temperature = weather.data.currently.temperature;
       });
     },
     getCurrentLocationWeather() {
       navigator.geolocation.getCurrentPosition( data => {
         let location = {
           lat: data.coords.latitude,
-          lon: data.coords.longitude
+          lng: data.coords.longitude
         }
-        Axios.get(`https://api.darksky.net/forecast/${DARK_SKY_API_KEY}/${location.lat},${location.lon}`).then(weather => {
+        Axios.get(`https://api.darksky.net/forecast/${DARK_SKY_API_KEY}/${location.lat},${location.lng}`).then(weather => {
           this.currentWeather = weather;
-          console.log(weather)
         });
       });
     },
-    onCitySearch($event) {
+    onCitySearch() {
+      let that = this;
       return new Promise( (resolve, reject) => {
-        Geocoder.geocode(this.searchLocation.city, function ( err, data ) {
-          this.searchLocation.city = data.results[0].formatted_address;
-          this.searchLocation.coords = data.results[0].geometry.location;
+        Geocoder.geocode(that.searchLocation.city, function ( err, data ) {
+          that.searchLocation.city = data.results[0].formatted_address;
+          that.searchLocation.coords = data.results[0].geometry.location;
+          resolve();
         });
-        this.getWeather(this.searchLocation.coords)
+      }).then(() => {
+        this.getWeather(this.searchLocation.coords);
       });
-    },
-    getCityCoords() {
-      return new Promise( (resolve, reject) => {
-        Geocoder.geocode(this.city, (err, data) => {
-          this.city = data.results[0].formatted_address;
-          this.lat = data.results[0].geometry.location.lat;
-          this.lon = data.results[0].geometry.location.lon;
-          
-        });
-      }).then( () => {
-        this.getWeather(this.userLocation);
-      })
-      
-    },
-    getWeather(location) {
-      console.log(location);
-      
     },
     onCityTrack($event) {
-      console.log('set this shit to local storage');
+      let ls = window.localStorage;
+      this.trackedWeather.push(this.searchLocation);
+      ls.setItem('trackedWeather', JSON.stringify(this.trackedWeather));
     }
   },
   beforeMount() {
-    return new Promise( (resolve, reject) => {
-      this.getCurrentLocationWeather();
-      resolve();
-    });
+    let hasTrackedCitiesInLocalStorage = window.localStorage.getItem('trackedWeather');
+    console.log(JSON.parse(hasTrackedCitiesInLocalStorage));
+    if (!hasTrackedCitiesInLocalStorage) {
+      return new Promise( (resolve, reject) => {
+        this.getCurrentLocationWeather();
+        resolve();
+      });
+    } else {
+      console.log('Display info for the tracked cities sitting in local storage');
+      this.trackedWeather = hasTrackedCitiesInLocalStorage;
+    }
+
   }
   
 };
