@@ -5,17 +5,21 @@
       <input type="text" v-model="searchLocation.city" />
       <button @click="onCitySearch">City Search</button>
     </label>
-    <p>Current Temperate at this computer's location: {{currentWeather.data.currently.temperature || 'Loading'}}</p>
+    <hr>
+    
+    <!-- <p>Current Temperate at this computer's location: {{currentWeather.data.currently.temperature || 'Loading'}}</p> -->
     <ul class="searchedCity">
       <li class="cityInformation">
-        <p>{{searchLocation.city}}</p>
-        <p>{{searchLocation.temperature}}</p>
-        <p>{{searchLocation.chanceOfRain}}</p>
+        <p>{{searchResults.city}}</p>
+        <p>{{searchResults.temperature}}</p>
+        <p>{{searchResults.chanceOfRain}}</p>
         <button class="button" @click="onCityTrack">Track this City's Weather</button>
       </li>
     </ul>
+
     <ul class="trackedCities">
       <li v-for="(city,i) in trackedWeather" :key="i" class="cityInformation">
+        <p>{{i}}</p>
         <p>{{city.city}}</p>
         <p>{{city.temperature}}</p>
         <p>{{city.chanceOfRain}}</p>
@@ -44,17 +48,7 @@ export default {
       },
 
       // The tracked cities per user's local Storage
-      trackedWeather: [
-        // {
-        //   city: 'Austin, TX',
-        //   temperature: '54 F',
-        //   chanceOfRain: '27%'
-        // }, {
-        //   city: 'Madison, WI',
-        //   temperature: '11 F',
-        //   chanceOfRain: '0.5%'
-        // }
-      ],
+      trackedWeather: [],
       
       // Placeholder for current location and local weather stats
       userLocation: {
@@ -72,14 +66,21 @@ export default {
         temperature: '',
         chanceOfRain: ''
       },
+      searchResults: {
+        city: '',
+        coords: {},
+        temperature: '',
+        chanceOfRain: ''
+      },
     }
   },
   methods: {
     getWeather(coords) {
       Axios.get(`https://api.darksky.net/forecast/${DARK_SKY_API_KEY}/${coords.lat},${coords.lng}`).then(weather => {
-        console.log(weather);
-        this.searchLocation.temperature = weather.data.currently.temperature;
-      });
+        this.searchResults.city = weather.data.currently.city;
+        this.searchResults.temperature = weather.data.currently.temperature;
+        this.searchResults.chanceOfRain = weather.data.currently.chanceOfRain;
+        });
     },
     getCurrentLocationWeather() {
       navigator.geolocation.getCurrentPosition( data => {
@@ -112,15 +113,15 @@ export default {
   },
   beforeMount() {
     let hasTrackedCitiesInLocalStorage = window.localStorage.getItem('trackedWeather');
-    console.log(JSON.parse(hasTrackedCitiesInLocalStorage));
-    if (!hasTrackedCitiesInLocalStorage) {
+    if (hasTrackedCitiesInLocalStorage) {
+      this.trackedWeather = JSON.parse(hasTrackedCitiesInLocalStorage);
+      return;
+    } else {
       return new Promise( (resolve, reject) => {
         this.getCurrentLocationWeather();
         resolve();
       });
-    } else {
-      console.log('Display info for the tracked cities sitting in local storage');
-      this.trackedWeather = hasTrackedCitiesInLocalStorage;
+      
     }
 
   }
@@ -130,7 +131,7 @@ export default {
 
 <style lang="scss">
 
-.trackedCity {
+.cityInformation {
   padding: 20px;
   margin: 20px;
   border: 1px solid #d9d9d9; 
