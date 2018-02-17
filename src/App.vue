@@ -1,54 +1,24 @@
 <template>
   <div id="app">
-    <router-view/>
-    <label>
-      <input type="text" v-model="searchLocation.city" />
-      <button @click="onCitySearch">City Search</button>
-    </label>
-    <hr>
-    
-    <!-- <p>Current Temperate at this computer's location: {{currentWeather.data.currently.temperature || 'Loading'}}</p> -->
-    <ul class="searchedCity">
-      <li class="cityInformation">
-        <p>{{searchResults.city}}</p>
-        <p>{{searchResults.temperature}}</p>
-        <p>{{searchResults.chanceOfRain}}</p>
-        <button class="button" @click="onCityTrack">Track this City's Weather</button>
-      </li>
-    </ul>
-
-    <!-- <ul class="trackedCities">
-      <li v-for="(city,i) in trackedWeather" :key="i" class="cityInformation">
-        <p>{{i}}</p>
-        <p>{{city.city}}</p>
-        <p>{{city.temperature}}</p>
-        <p>{{city.chanceOfRain}}</p>
-      </li>
-    </ul> -->
-    <quick-forecast 
-      v-if="trackedWeather.length"
-      v-for="(city,i) in trackedWeather" :key="i" 
-      :city-text="trackedWeather.city"
-      :current-temp="trackedWeather.temperature"
-      :five-day-forecast="trackedWeather.fiveDayForecast" />
-    
+    <router-view></router-view>
   </div>
+  
 </template>
 
 <script>
 import Axios from "axios";
 import Geocoder from "geocoder";
 import Promise from "bluebird";
-
+const DARK_SKY_API_KEY = "acac1384f16e2dccd6b5813d915b0ae8";
 import QuickForecast from "./components/weather/quick-forecast.vue";
 
-const DARK_SKY_API_KEY = "acac1384f16e2dccd6b5813d915b0ae8";
+
 
 export default {
   name: "App",
-  components: {
-    "quick-forecast": QuickForecast
-  },
+  // components: {
+  //   "quick-forecast": QuickForecast
+  // },
   data() {
     return {
       currentWeather: {
