@@ -29,10 +29,10 @@
                             {{day.lowTemp}} Degrees F
                         </div>
                         <div class="weatherStat__item weather__rainChance">
-                            {{day.rainChance}} %
+                            {{day.rainChance * 100}} %
                         </div>
                         <div class="weatherStat__item weather__gotoHourly">
-                            go to hourly forecast
+                            <router-link exact :to="{name: 'weather-details', params: {name: $router.currentRoute.params.cityname, deets: deets}}"> > </router-link>
                         </div>
                     </div>
                 </li>
@@ -52,19 +52,21 @@
 
     export default {
         name: 'map-container',
-        props: {
-            city: {
-                type: String,
-                required: true
-            }
-        },
+        // props: {
+        //     city: {
+        //         type: String,
+        //         required: true
+        //     }
+        // },
         watch: {
-            city: function(newValue, oldValue) {
-                this.setResults(newValue);
+            '$route' (to, from) {
+                this.setResults(this.$router.currentRoute.params.cityname)
             }
         },
         data() {
             return {
+                // city: this.$router.currentRoute.params.cityname,
+                deets: undefined,
                 cityData: {
                     city: '',
                     coords: {
@@ -76,6 +78,9 @@
                 },
                 forecast: []
             }
+        },
+        beforeMount() {
+            this.setResults(this.$router.currentRoute.params.cityname)
         },
         methods: {
             setResults(val) {
@@ -98,6 +103,7 @@
                                 rainChance: day.precipProbability
                             });
                         });
+                        this.deets = weather;
 
                     }).then( () => {
                         this.$emit('resolved', true);

@@ -5,37 +5,11 @@
                 <form @submit="submitForm" class="citySearchForm">
                     <input placeholder="Search..."
                         type="search"
-                        icon="magnify"
                         v-model="citySearchInput" />
                     <button class="" type="submit">Search</button>
                 </form>
             </section>
-            <section class="section" v-show="citySearchedFor">
-                <map-container :city="citySearch" @resolved="resultsReturned" />
-            </section>  
-
-            <!-- <section class="section">
-                <div v-for="(day,i) in forecastDays" :key="i" class="forecastDay">
-                    <header>
-                        <h1>{{day.dayOfWeek}}</h1>
-                        <h2>{{day.date}}</h2>
-                    </header>
-                    <div class="weatherStatsContainer weatherStats--horizontal">
-                        <div class="weather__highTemp">
-                            {{highTemp}}
-                        </div>
-                        <div class="weather__lowTemp">
-                            {{lowTemp}}
-                        </div>
-                        <div class="weather__rainChance">
-                            {{rainChance}}
-                        </div>
-                        <div class="weather__gotoHourly">
-                            {{routerGoToHourly}}
-                        </div>
-                    </div>
-                </div>
-            </section> -->
+            <router-view></router-view>
         </div>
         <div v-else>Loading...</div>
     </div>
@@ -44,6 +18,7 @@
 <script>
     import Promise from "bluebird";
     import MapContainer from '../components/map-container';
+
     export default {
         components: {
             'map-container': MapContainer
@@ -51,9 +26,7 @@
         data() {
             return {
                 isLoading: true,
-                citySearchedFor: false,
-                citySearchInput: '',
-                citySearch: ''
+                citySearchInput: ''
             }
         },
         beforeMount() {
@@ -68,10 +41,7 @@
         methods: {
             submitForm($event) {
                 $event.preventDefault();
-                this.citySearch = this.citySearchInput;
-            },
-            resultsReturned(val) {
-                if (val) this.citySearchedFor = true;
+                this.$router.push({name: 'cityforecast', params: { cityname: this.citySearchInput }})
             }
         }
     };

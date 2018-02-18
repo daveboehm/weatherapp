@@ -6,9 +6,14 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
-      name: 'landing',
-      component: () => import('../pages/landing.vue')
+      path: '/:cityname',
+      name: 'cityforecast',
+      component: () => import('../components/map-container')
+    },
+    {
+      path: '/:cityname/weather-details',
+      name: 'weather-details',
+      component: () => import('../pages/weather-details'),
     }
   ]
 })
