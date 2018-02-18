@@ -20,6 +20,7 @@
     "cors-anywhere": "^0.4.1",
     "geocoder": "^0.2.3",
     "lodash": "^4.17.4",
+    "moment": "^2.20.1",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vue2-google-maps": "^0.8.6",

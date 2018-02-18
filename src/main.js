@@ -4,13 +4,12 @@
 import Vue from 'vue'
 import App from './pages/landing'
 import router from './router'
-import Buefy from 'buefy'
-import 'buefy/lib/buefy.css'
+import moment from 'moment'
 import * as VueGoogleMaps from 'vue2-google-maps'
 
 (function () {
 	Vue.config.productionTip = false
-	Vue.use(Buefy)
+	Vue.use(moment)
 	Vue.use(VueGoogleMaps, {
 		load: {
 			key: 'AIzaSyAFlTZgI5T0l9S7NbaU8H9qTQ9_xo5GLfY',
